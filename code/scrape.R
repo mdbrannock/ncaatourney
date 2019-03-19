@@ -1,9 +1,10 @@
 library(tidyverse)
 library(rvest)
+library(here)
 options(stringsAsFactors = F)
 
 # Define the years we care about
-start <- 2005
+start <- 1993
 years <- start:2019
 
 # Get team stats for all years
@@ -87,14 +88,21 @@ games <- map_dfr(years, ~{
   tourn_text2 <- tourn_text[-c(91, 92, 183, 184, 275, 276, 367, 368, 387, 388)]
   
   # Need both teams, both scores, and both seeds
+  # Each team gets the game (so each game goes in twice)
   year_games <- data.frame(
-    year = .x,
-    seed1 = tourn_text2[seq(1, length(tourn_text2), 6)],
-    team1 = tourn_text2[seq(2, length(tourn_text2), 6)],
-    scor1 = tourn_text2[seq(3, length(tourn_text2), 6)],
-    seed2 = tourn_text2[seq(4, length(tourn_text2), 6)],
-    team2 = tourn_text2[seq(5, length(tourn_text2), 6)],
-    scor2 = tourn_text2[seq(6, length(tourn_text2), 6)]
+    year  = .x,
+    seed  = c(tourn_text2[seq(1, length(tourn_text2), 6)], 
+              tourn_text2[seq(4, length(tourn_text2), 6)]),
+    team  = c(tourn_text2[seq(2, length(tourn_text2), 6)], 
+              tourn_text2[seq(5, length(tourn_text2), 6)]),
+    pts   = c(tourn_text2[seq(3, length(tourn_text2), 6)], 
+              tourn_text2[seq(6, length(tourn_text2), 6)]),
+    oseed = c(tourn_text2[seq(4, length(tourn_text2), 6)], 
+              tourn_text2[seq(1, length(tourn_text2), 6)]),
+    oteam = c(tourn_text2[seq(5, length(tourn_text2), 6)], 
+              tourn_text2[seq(2, length(tourn_text2), 6)]),
+    opts  = c(tourn_text2[seq(6, length(tourn_text2), 6)], 
+              tourn_text2[seq(3, length(tourn_text2), 6)])
   )
 })
 
@@ -102,4 +110,13 @@ games <- map_dfr(years, ~{
 team_stats2 <- team_stats %>% 
   mutate_at(vars(-school), as.numeric)
 games2 <- games %>% 
-  mutate_at(vars(-team1,-team2), as.numeric)
+  mutate_at(vars(-team,-oteam), as.numeric)
+
+# Drop out teams that didn't make the tournament
+# Change name to remove "NCAA"
+team_stats3 <- team_stats2[grep("NCAA", team_stats2$school),] %>% 
+  mutate(school = substr(school, 1, nchar(school) - 5))
+
+# Save results as of now
+saveRDS(team_stats3, file = "data/team_stats.rds")
+saveRDS(games2, file = "data/games.rds")
