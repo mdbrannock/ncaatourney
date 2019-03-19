@@ -3,7 +3,8 @@ library(rvest)
 options(stringsAsFactors = F)
 
 # Define the years we care about
-years <- 2005:2019
+start <- 2005
+years <- start:2019
 
 # Get team stats for all years
 team_stats <- map_dfr(years, ~{
@@ -71,7 +72,7 @@ team_stats <- map_dfr(years, ~{
 })
 
 # Get tournament results
-years = 2005:2018
+years = start:2018
 games <- map_dfr(years, ~{
   print(.x)
   
