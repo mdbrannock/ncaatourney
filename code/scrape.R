@@ -118,5 +118,5 @@ team_stats3 <- team_stats2[grep("NCAA", team_stats2$school),] %>%
   mutate(school = substr(school, 1, nchar(school) - 5))
 
 # Save results as of now
-saveRDS(team_stats3, file = "data/team_stats.rds")
-saveRDS(games2, file = "data/games.rds")
+saveRDS(team_stats3, file = here("data/team_stats.rds"))
+saveRDS(games2, file = here("data/games.rds"))
