@@ -33,4 +33,20 @@ team_stats2 <- team_stats %>%
   left_join(name_conv, by = c("school" = "long")) %>% 
   mutate(school = short) %>% select(-short)
 
-# 
+# Check to make sure all the games have a matching name
+setdiff(games$team, team_stats2$school)
+
+# What differences in seeds are most common
+table(games$seed - games$oseed)
+
+# Add some variables to games
+# Splitting into analysis groups
+games2 <- games %>% 
+  mutate(seeddiff = seed - oseed,
+         ptsdiff = pts - opts,
+         win = ptsdiff > 0) %>% 
+  select(year, team, seed, seeddiff, ptsdiff, win, group)
+
+# Merge in team_stats
+stats_games <- games2 %>% 
+  left_join(team_stats2, by = c("team" = "school", "year" = "year"))
