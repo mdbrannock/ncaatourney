@@ -45,8 +45,18 @@ games2 <- games %>%
   mutate(seeddiff = seed - oseed,
          ptsdiff = pts - opts,
          win = ptsdiff > 0) %>% 
-  select(year, team, seed, seeddiff, ptsdiff, win, group)
+  select(year, team, seed, seeddiff, ptsdiff, win)
 
 # Merge in team_stats
 stats_games <- games2 %>% 
   left_join(team_stats2, by = c("team" = "school", "year" = "year"))
+
+# How are we doing on missing values? I know some metrics weren't always tracked
+# Handful missing turnover-related stuff, and a bunch missing points for somehow
+# Other than that, doing mostly okay except for the ones that weren't tracked.
+lapply(names(stats_games), function(var){
+  paste0(var, ": ", sum(is.na(stats_games[[var]])))
+}) %>% unlist()
+
+# Save dataset
+saveRDS(stats_games, here("data/stats_games.rds"))
